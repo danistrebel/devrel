@@ -61,7 +61,7 @@ prepare_resources
 create_self_signed_cert $ENV_GROUP_NAME
 
 # create all required service accounts and download their keys
-create_sa
+create_sa $ENV_NAME
 
 # install the Apigee runtime
 install_runtime $ENV_NAME $ENV_GROUP_NAME

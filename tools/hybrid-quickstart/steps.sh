@@ -460,7 +460,29 @@ create_self_signed_cert() {
 }
 
 create_sa() {
-  yes | "$APIGEECTL_HOME"/tools/create-service-account -e prod -d "$HYBRID_HOME/service-accounts"
+  ENV_NAME=$1
+
+  # Create service accounts without downloading keys
+#  yes n | "$APIGEECTL_HOME"/tools/create-service-account -e prod -d "$HYBRID_HOME/service-accounts"
+
+  kubectl create ns apigee || echo "apigee ns already exists"
+
+  enable_workload_identity "apigee-mart" "apigee-mart"
+  enable_workload_identity "apigee-connect-agent" "apigee-mart"
+  enable_workload_identity "apigee-watcher" "apigee-watcher"
+  enable_workload_identity "apigee-runtime" "apigee-runtime" "$ENV_NAME"
+  enable_workload_identity "apigee-synchronizer" "apigee-synchronizer" "$ENV_NAME"
+  enable_workload_identity "apigee-udca" "apigee-udca" "$ENV_NAME"
+}
+
+enable_workload_identity() {
+  GCP_SA=$1
+  K8S_SA_PREFIX=$2
+  ENV=$3
+  K8S_SA="$($APIGEECTL_HOME/apigeectl encode --org "$PROJECT_ID" --env "$ENV" 2>&1 | grep "$K8S_SA_PREFIX" | xargs)-sa"
+  echo "assigning $GCP_SA to $K8S_SA"
+  kubectl create sa -n apigee $K8S_SA || echo "SA $K8S_SA not created. Does it exist?"
+  kubectl annotate serviceaccount "$K8S_SA" --overwrite -n apigee "iam.gke.io/gcp-service-account=$GCP_SA@$PROJECT_ID.iam.gserviceaccount.com" || echo "no annotation added to SA $K8S_SA"
 }
 
 install_runtime() {
@@ -472,6 +494,7 @@ install_runtime() {
 gcp:
   projectID: $PROJECT_ID
   region: "$REGION" # Analytics Region
+  workloadIdentityEnabled: true
 # Apigee org name.
 org: $PROJECT_ID
 # Kubernetes cluster name details
@@ -488,37 +511,19 @@ instanceID: "$PROJECT_ID-$(date +%s)"
 
 envs:
   - name: $ENV_NAME
-    serviceAccountPaths:
-      synchronizer: "$HYBRID_HOME/service-accounts/$PROJECT_ID-apigee-synchronizer.json"
-      udca: "$HYBRID_HOME/service-accounts/$PROJECT_ID-apigee-udca.json"
-      runtime: "$HYBRID_HOME/service-accounts/$PROJECT_ID-apigee-distributed-trace.json"
-mart:
-  serviceAccountPath: "$HYBRID_HOME/service-accounts/$PROJECT_ID-apigee-mart.json"
-
-connectAgent:
-  serviceAccountPath: "$HYBRID_HOME/service-accounts/$PROJECT_ID-apigee-mart.json"
 
 metrics:
   enabled: true
-  serviceAccountPath: "$HYBRID_HOME/service-accounts/$PROJECT_ID-apigee-metrics.json"
-
-watcher:
-  serviceAccountPath: "$HYBRID_HOME/service-accounts/$PROJECT_ID-apigee-watcher.json"
-
-logger:
-  enabled: false
-  serviceAccountPath: "$HYBRID_HOME/service-accounts/$PROJECT_ID-apigee-logger.json"
-
 EOF
     pushd "$HYBRID_HOME" || return # because apigeectl uses pwd-relative paths
     mkdir -p "$HYBRID_HOME"/generated
     "$APIGEECTL_HOME"/apigeectl init -f "$HYBRID_HOME"/overrides/overrides.yaml --print-yaml > "$HYBRID_HOME"/generated/apigee-init.yaml
-    sleep 2 && echo -n "⏳ Waiting for Apigeectl init "
+    echo -n "⏳ Waiting for Apigeectl init " && sleep 2 # initial delay
     wait_for_ready "0" "$APIGEECTL_HOME/apigeectl check-ready -f $HYBRID_HOME/overrides/overrides.yaml > /dev/null  2>&1; echo \$?" "apigeectl init: done."
 
     "$APIGEECTL_HOME"/apigeectl apply -f "$HYBRID_HOME"/overrides/overrides.yaml --print-yaml > "$HYBRID_HOME"/generated/apigee-runtime.yaml
 
-    sleep 2 && echo -n "⏳ Waiting for Apigeectl apply "
+    echo -n "⏳ Waiting for Apigeectl apply" && sleep 60 # initial delay
     wait_for_ready "0" "$APIGEECTL_HOME/apigeectl check-ready -f $HYBRID_HOME/overrides/overrides.yaml > /dev/null  2>&1; echo \$?" "apigeectl apply: done."
 
     popd || return
