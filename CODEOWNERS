@@ -10,6 +10,8 @@
 /references/southbound-mtls           @danistrebel
 /references/threat-protect            @joelgauci
 /labs/best-practices-hackathon        @sauliuz @seymen
+/labs/self-study-student-ui           @danistrebel
+/labs/self-study-tutorial-basic       @danistrebel
 /tools/pipeline-runner                @seymen @danistrebel
 /tools/pipeline-linter                @seymen @danistrebel
 /tools/apigee-sackmesser              @danistrebel

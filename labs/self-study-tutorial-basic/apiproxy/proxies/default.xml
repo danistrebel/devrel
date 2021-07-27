@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+ Copyright 2021 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<ProxyEndpoint name="default">
+    <PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>SA-client-ip</Name>
+            </Step>
+        </Request>
+        <Response/>
+    </PreFlow>
+    <Flows>
+        <Flow name="validate">
+            <Request/>
+            <Response>
+                <Step>
+                    <Name>JS-validate</Name>
+                </Step>
+            </Response>
+            <Condition>(proxy.pathsuffix MatchesPath "/validate") and (request.verb = "POST")</Condition>
+        </Flow>
+        <Flow name="tasks">
+            <Request/>
+            <Response>
+                <Step>
+                    <Name>JS-tasks</Name>
+                </Step>
+            </Response>
+            <Condition>(proxy.pathsuffix MatchesPath "/tasks/*") and (request.verb = "GET")</Condition>
+        </Flow>
+        <Flow name="wisdom">
+            <Request>
+                <Step>
+                    <Name>OA-verify-token</Name>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>JS-random-quote</Name>
+                </Step>
+            </Response>
+            <Condition>(proxy.pathsuffix MatchesPath "/wisdom**") and (request.verb = "GET")</Condition>
+        </Flow>
+        <Flow name="token">
+            <Request>
+                <Step>
+                    <Name>OA-generate-token</Name>
+                </Step>
+            </Request>
+            <Response/>
+            <Condition>(proxy.pathsuffix MatchesPath "/token") and (request.verb = "POST")</Condition>
+        </Flow>
+        <Flow name="cors">
+            <Condition>request.verb = "OPTIONS"</Condition>
+        </Flow>
+        <Flow name="not-found">
+            <Request>
+                <Step>
+                    <Name>RF-not-found</Name>
+                </Step>
+            </Request>
+        </Flow>
+    </Flows>
+    <PostFlow name="PostFlow">
+        <Request/>
+        <Response>
+            <Step>
+                <Name>AM-cors</Name>
+            </Step>
+        </Response>
+    </PostFlow>
+    <HTTPProxyConnection>
+        <BasePath>/basic-tutorial/v0</BasePath>
+        <VirtualHost>secure</VirtualHost>
+    </HTTPProxyConnection>
+    <RouteRule name="default"/>
+</ProxyEndpoint>

@@ -1,0 +1,19 @@
+{
+  "name": "self-study-tutorial-basic",
+  "version": "1.0.0",
+  "description": "Basic Apigee Self-Study Tutorial",
+  "scripts": {
+    "test": "npm run unit-test && npm run integration-test",
+    "unit-test": "mocha --recursive \"./test/unit/*.js\"",
+    "integration-test": "cucumber-js --publish-quiet ./test/integration",
+    "lint": "apigeelint -s ./apiproxy -f unix.js -e PO025,PO013"
+  },
+  "author": "danistrebel",
+  "dependencies": {
+    "@cucumber/cucumber": "^7.3.0",
+    "apickli": "^3.0.0",
+    "apigeelint": "^2.7.0",
+    "mocha": "^9.0.3",
+    "sinon": "^11.1.2"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "self-study-client",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "babel static/js -d generated/docs/static/js && cp -r static/styles generated/docs/static/styles && cp -r static/img generated/docs/static/img&& cp *.html generated/docs"
+  },
+  "author": "danistrebel",
+  "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.14.8"
+  }
+}

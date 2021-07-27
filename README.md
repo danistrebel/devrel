@@ -83,6 +83,10 @@ technical or non-technical topic.
 
 - [Best Practices Hackathon](labs/best-practices-hackathon) [(web)](https://apigee.github.io/devrel/labs/best-practices-hackathon)
   A 300 level lab to learn Apigee Best Practices
+- [Self Study Student UI](labs/self-study-student-ui) [(web)](https://apigee.github.io/devrel/labs/self-study-student-ui)
+  A web UI for participating in self-study tutorials
+- [Self Study Tutorial Basic](labs/self-study-tutorial-basic)
+  A self study tutorial to introduce basic Apigee concept with built-in validation.
 
 ## Contributing
 
