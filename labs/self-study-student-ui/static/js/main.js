@@ -16,8 +16,12 @@
 
 if (!sessionStorage.getItem('apigee.tutorialEndpoint')) {
     const tutorialEnpoint = window.prompt("Enter the endpoint for this tutorial:");
-    // TODO test tutorial endpoint.
-    sessionStorage.setItem('apigee.tutorialEndpoint', tutorialEnpoint)
+    if (tutorialEnpoint) {
+        sessionStorage.setItem('apigee.tutorialEndpoint', tutorialEnpoint)
+    } else {
+        window.alert("No endpoint set");
+        window.location.reload();
+    }
 }
 
 new Vue({
@@ -30,17 +34,13 @@ new Vue({
         implementation: {
             endpoint: "",
         },
-        appState: {}
+        appState: {},
+        validation: null
     },
     created: function() {
         this.maxStep = parseInt(sessionStorage.getItem('apigee.maxStep'), 10) || this.maxStep;
-        if (!sessionStorage.getItem('apigee.currentTaskDescription')) {
-            this.fetchNthStep(0);
-        } else {
-            const storedTask = JSON.parse(sessionStorage.getItem('apigee.currentTaskDescription'));
-            this.stepInstruction = storedTask.instruction;
-            this.currentStep = storedTask.step;
-        }
+        this.currentStep = sessionStorage.getItem('apigee.currentStep');
+        this.fetchNthStep(this.currentStep || 0);
     },
     methods: {
         checkProgress: function (event) {
@@ -57,8 +57,9 @@ new Vue({
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        M.toast({ html: data.error });
+                        this.validation = { error: data.error };
                     } else {
+                        this.validation = { success: true }
                         this.fetchNthStep(this.currentStep+1);
                     }
                 })
@@ -91,9 +92,19 @@ new Vue({
         },
         fetchNthStep: function(n) {
             fetch(`${sessionStorage.getItem('apigee.tutorialEndpoint')}/tasks/${n}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 404) {
+                        sessionStorage.removeItem('apigee.tutorialEndpoint');
+                        window.alert('Invalid tutorial endpoint. Please provide a correct one.');
+                        window.location.reload();
+                    } else {
+                        throw new Error(JSON.stringify(response));
+                    }
+                })
                 .then(data => {
-                    sessionStorage.setItem('apigee.currentTaskDescription', JSON.stringify(data));
+                    sessionStorage.setItem('apigee.currentStep', n);
                     this.stepInstruction = data.instruction;
                     this.currentStep = data.step;
                     this.maxStep = Math.max(this.maxStep, data.step);

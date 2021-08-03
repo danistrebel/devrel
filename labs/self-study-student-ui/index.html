@@ -36,7 +36,7 @@
 </head>
 
 <body>
-    <div id="apigee-tutorial">
+    <div id="apigee-tutorial" v-if="">
         <div class="instruction card">
             <vue-simple-markdown :source="stepInstruction" :emoji="false"></vue-simple-markdown>
             <div class="footer">
@@ -64,7 +64,20 @@
             </div>
         </div>
         <div class="reset"><a href="#" v-on:click="resetApp($event)">reset lab</a></div>
+        <div class="validation-result" v-if="validation">
+            <div class="inner">
+                <div v-if="validation.success">
+                    <h1>Success 🎉</h1>
+                </div>
+                <div v-if="validation.error">
+                    <h1>Something is missing 🧐</h1>
+                    <div class="error-msg">{{validation.error}}</div>
+                </div>
+                <a class="btn close" v-on:click="validation=null">Close</a>
+            </div>
+        </div>
     </div>
+
     <script src='static/js/main.js'></script>
 </body>
 

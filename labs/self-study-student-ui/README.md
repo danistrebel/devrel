@@ -3,7 +3,7 @@
 This UI Can be used together with Tutorial APIs e.g. [labs/self-study-tutorial-basic](../self-study-tutorial-basic).
 For interactive, self-checking labs.
 
-## Getting Started
+## Using the Student UI
 
 1. Deploy a Tutorial API.
 1. Visit the Github Pages [hosted](https://apigee.github.io/devrel/labs/.self-study-student-ui) version of this UI or host your own.
@@ -13,3 +13,9 @@ For interactive, self-checking labs.
 ## Screenshot
 
 ![UI screenshot](../self-study-tutorial-basic/img/screenshot.png)
+
+## Development
+
+```sh
+npm run serve
+```

@@ -25,7 +25,6 @@ body, #apigee-tutorial {
     display: flex;
     flex-direction: row;
     max-height: 1000px;
-    padding: 20px
 }
 
 #apigee-tutorial .instruction {
@@ -33,6 +32,7 @@ body, #apigee-tutorial {
     padding: 20px;
     display: flex;
     flex-direction: column;
+    margin: 20px;
 }
 
 #apigee-tutorial .instruction .markdown-body {
@@ -100,4 +100,29 @@ body, #apigee-tutorial {
 
 .footer .spacer {
     flex: 1
+}
+
+.validation-result {
+    min-height: 100vh; /* height of the browser viewport */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    background: #2e2e2ee2;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    color: #f7f6f6;
+}
+
+.validation-result .inner {
+    text-align: center;
+}
+
+.validation-result .inner .error-msg {
+    font-size: 1.4em;
+}
+
+.validation-result .inner .close {
+    margin-top: 40px;
 }
